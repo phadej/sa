@@ -2,13 +2,16 @@
 {-# LANGUAGE RecordWildCards #-}
 module SA.Example.SplitMix16 where
 
-import Control.Monad    (when)
-import Control.Monad.ST (ST, runST)
-import Numeric (showHex)
+import Control.Monad          (when)
+import Control.Monad.ST       (ST, runST)
 import Data.Bits
-import Data.Foldable    (for_)
-import Data.Word        (Word16, Word32, Word64)
+import Data.Foldable          (for_)
+import Data.Word              (Word16, Word32, Word64)
+import Distribution.Utils.MD5 (md5)
+import GHC.Fingerprint        (Fingerprint (..))
+import Numeric                (showHex)
 
+import qualified Data.ByteString             as BS
 import qualified Data.Vector.Unboxed         as UV
 import qualified Data.Vector.Unboxed.Mutable as MUV
 import qualified System.Random.SplitMix      as SM
@@ -45,7 +48,7 @@ splitmixProblem steps = Problem {..} where
     change0 = 0.001
     change1 = 0.000001
 
-    schedule = 
+    schedule =
         [ D (log 2 / delta)
         | step <- [0 .. steps]
         , let delta = fromIntegral step / fromIntegral steps * (change1 - change0) + change0
@@ -57,7 +60,7 @@ splitmixProblem steps = Problem {..} where
         in if i < 16
            then Params (complementBit p0 i) p1
            else Params p0 (complementBit p1 (i - 16))
-      
+
 
 -------------------------------------------------------------------------------
 -- parameterised hash
@@ -154,6 +157,17 @@ avalancheStep u f vec = do
 
             -- check when they are not the same
             when (testBit ne j) $ MUV.unsafeModify vec succ (i * 16 + j)
+
+-------------------------------------------------------------------------------
+-- MD5
+-------------------------------------------------------------------------------
+
+truncated16MD5 :: Word16 -> Word16
+truncated16MD5 w = fromIntegral res
+  where
+    Fingerprint _ res = md5 (BS.pack [lo,hi])
+    lo = fromIntegral w
+    hi = fromIntegral (w `shiftR` 8)
 
 -------------------------------------------------------------------------------
 -- 32bit sanity check

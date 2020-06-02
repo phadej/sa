@@ -2,9 +2,7 @@ cabal-version: 2.2
 name:          sa
 version:       0
 synopsis:      Simulated Annealing
-description:
-  Simulated Annealing...
-
+description:   Simulated Annealing...
 category:      Algorithms
 maintainer:    Oleg Grenrus <oleg.grenrus@iki.fi>
 author:        Oleg.Grenrus <oleg.grenrus@iki.fi>
@@ -21,13 +19,15 @@ library
   hs-source-dirs:   src
   exposed-modules:
     SA
-    SA.Example.SplitMix16
-    SA.Example.Ramp
     SA.Example.FinnishRandonneur
+    SA.Example.Ramp
+    SA.Example.SplitMix16
 
   -- GHC boot libraries
   build-depends:
     , base          ^>=4.12
+    , bytestring
+    , Cabal         ^>=3.2.0.0
     , containers    ^>=0.6.0.1
     , deepseq       ^>=1.4.4.0
     , transformers  ^>=0.5.6.1
